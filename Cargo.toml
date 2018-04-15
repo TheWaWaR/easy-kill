@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "easy-kill",
+  "easy-kill-cli",
+]
