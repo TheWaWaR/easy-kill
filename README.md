@@ -1,4 +1,4 @@
-# easy-kill
+# Easy Kill
 Easy kill processes.
 
 
