@@ -78,10 +78,14 @@ fn main() {
             .take(8)
             .collect::<Vec<(u32, &str)>>();
 
+        let items = stats
+            .iter()
+            .map(|&(pid, command)| format!("[{}]: {}", pid, command))
+            .collect::<Vec<String>>();
         let selections = Checkboxes::new()
-            .items(stats
+            .items(items
                    .iter()
-                   .map(|&(_pid, command)| command)
+                   .map(|s| s.as_ref())
                    .collect::<Vec<&str>>()
                    .as_slice())
             .interact()
@@ -92,7 +96,7 @@ fn main() {
         } else {
             println!("You selected these processes:");
             for selection in selections {
-                println!("  [{}]: {}", selection, stats[selection].1);
+                println!("  [{}]: {}", selection, items[selection]);
             }
         }
     }
