@@ -7,6 +7,7 @@ extern crate libc;
 #[macro_use]
 extern crate lazy_static;
 
+use std::ffi::CStr;
 use std::process::{self, Command};
 
 use regex::Regex;
@@ -101,7 +102,12 @@ fn main() {
                 for selection in selections {
                     match unsafe { libc::kill(stats[selection].0 as i32, 15) } {
                         0 => println!(" success {}", items[selection]),
-                        code @ _ => println!(" failed({}) {}", code, items[selection]),
+                        code @ _ => {
+                            let err_msg = (unsafe {
+                                CStr::from_ptr(libc::strerror(-code))
+                            }).to_str().unwrap();
+                            println!(" failed({}: {}) {}", code, err_msg, items[selection]);
+                        },
                     }
                 }
             }
