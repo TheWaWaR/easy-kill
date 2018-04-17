@@ -32,12 +32,12 @@ lazy_static! {
     static ref PS_REGEX: Regex = Regex::new(PS_PATTERN).unwrap();
 }
 
-struct ProcessInfo {
-    user: String,
-    pid: u32,
-    port: u16,
-    command: String,
-}
+// struct ProcessInfo {
+//     user: String,
+//     pid: u32,
+//     port: u16,
+//     command: String,
+// }
 
 fn main() {
     let matches = clap::App::new("Easy kill processes")
@@ -53,7 +53,7 @@ fn main() {
             .arg("aux")
             .stdout(process::Stdio::piped())
             .spawn()
-            .expect("ERROR: run ps failed");
+            .expect("ERROR: run `ps aux` failed");
         let ps_pid = ps_child.id();
         let output = ps_child.wait_with_output().unwrap();
         let output_string = String::from_utf8_lossy(&output.stdout);
@@ -99,14 +99,14 @@ fn main() {
             } else {
                 println!("You selected these processes:");
                 for selection in selections {
-                    println!("  [{}]: {}", selection, items[selection]);
-                    unsafe {
-                        libc::kill(stats[selection].0 as i32, 15);
+                    match unsafe { libc::kill(stats[selection].0 as i32, 15) } {
+                        0 => println!(" success {}", items[selection]),
+                        code @ _ => println!(" failed({}) {}", code, items[selection]),
                     }
                 }
             }
         }
     } else {
-        println!("ERROR: no pattern given!");
+        println!("no pattern given!");
     }
 }
