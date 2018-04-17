@@ -7,7 +7,7 @@ authors = ["Qian Linfeng <thewawar@gmail.com>"]
 
 [[bin]]
 path = "src/main.rs"
-name = "ek"
+name = "ekill"
 
 [dependencies]
 clap = "^2.31.2"
