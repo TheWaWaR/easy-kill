@@ -3,6 +3,7 @@
 extern crate clap;
 extern crate dialoguer;
 extern crate regex;
+extern crate libc;
 #[macro_use]
 extern crate lazy_static;
 
@@ -97,6 +98,9 @@ fn main() {
             println!("You selected these processes:");
             for selection in selections {
                 println!("  [{}]: {}", selection, items[selection]);
+                unsafe {
+                    libc::kill(stats[selection].0 as i32, 15);
+                }
             }
         }
     }

@@ -8,4 +8,5 @@ clap = "^2.31.2"
 dialoguer = "^0.1.0"
 regex = "^0.2.10"
 lazy_static = "^1.0.0"
+libc = "^0.2.40"
 easy-kill = { path = "../easy-kill", version = "^0.1.0" }
