@@ -1,6 +1,7 @@
 [package]
 name = "easy-kill"
 version = "0.1.0"
+license = "MIT"
 description = "Easy kill processes (library)"
 authors = ["Qian Linfeng <thewawar@gmail.com>"]
 
