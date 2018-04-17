@@ -53,7 +53,7 @@ fn main() {
             .arg("aux")
             .stdout(process::Stdio::piped())
             .spawn()
-            .expect("Run ps failed");
+            .expect("error: run ps failed");
         let ps_pid = ps_child.id();
         let output = ps_child.wait_with_output().unwrap();
         let output_string = String::from_utf8_lossy(&output.stdout);
@@ -79,7 +79,7 @@ fn main() {
             .collect::<Vec<(u32, &str)>>();
 
         if stats.is_empty() {
-            println!("No process found");
+            println!("Warning: no process found!");
         } else {
             let items = stats
                 .iter()
@@ -106,5 +106,7 @@ fn main() {
                 }
             }
         }
+    } else {
+        println!("Error: no pattern given!");
     }
 }

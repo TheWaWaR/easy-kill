@@ -3,6 +3,10 @@ name = "easy-kill-cli"
 version = "0.1.0"
 authors = ["Qian Linfeng <thewawar@gmail.com>"]
 
+[[bin]]
+path = "src/main.rs"
+name = "ek"
+
 [dependencies]
 clap = "^2.31.2"
 dialoguer = "^0.1.0"
