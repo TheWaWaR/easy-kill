@@ -76,30 +76,33 @@ fn main() {
                 }
                 None
             })
-            .take(8)
             .collect::<Vec<(u32, &str)>>();
 
-        let items = stats
-            .iter()
-            .map(|&(pid, command)| format!("[{}]: {}", pid, command))
-            .collect::<Vec<String>>();
-        let selections = Checkboxes::new()
-            .items(items
-                   .iter()
-                   .map(|s| s.as_ref())
-                   .collect::<Vec<&str>>()
-                   .as_slice())
-            .interact()
-            .unwrap();
-
-        if selections.is_empty() {
-            println!("You did not select anything :(");
+        if stats.is_empty() {
+            println!("No process found");
         } else {
-            println!("You selected these processes:");
-            for selection in selections {
-                println!("  [{}]: {}", selection, items[selection]);
-                unsafe {
-                    libc::kill(stats[selection].0 as i32, 15);
+            let items = stats
+                .iter()
+                .map(|&(pid, command)| format!("[{}]: {}", pid, command))
+                .collect::<Vec<String>>();
+            let selections = Checkboxes::new()
+                .items(items
+                       .iter()
+                       .map(|s| s.as_ref())
+                       .collect::<Vec<&str>>()
+                       .as_slice())
+                .interact()
+                .unwrap();
+
+            if selections.is_empty() {
+                println!("You did not select anything :(");
+            } else {
+                println!("You selected these processes:");
+                for selection in selections {
+                    println!("  [{}]: {}", selection, items[selection]);
+                    unsafe {
+                        libc::kill(stats[selection].0 as i32, 15);
+                    }
                 }
             }
         }
