@@ -8,6 +8,7 @@ use console::{Key, Term};
 /// Renders a multi select checkbox menu.
 pub struct Checkbox {
     items: Vec<String>,
+    default_selected: bool,
     clear: bool,
 }
 
@@ -16,6 +17,7 @@ impl Checkbox {
     pub fn new() -> Self {
         Checkbox {
             items: vec!["ALL".to_owned()],
+            default_selected: false,
             clear: true,
         }
     }
@@ -25,6 +27,12 @@ impl Checkbox {
     /// The default is to clear the checkbox menu.
     pub fn clear(&mut self, val: bool) -> &mut Self {
         self.clear = val;
+        self
+    }
+
+    /// The default is select the checkbox
+    pub fn default(&mut self, selected: bool) -> &mut Self {
+        self.default_selected = selected;
         self
     }
 
@@ -53,7 +61,9 @@ impl Checkbox {
     /// Like `interact` but allows a specific terminal to be set.
     pub fn interact_on(&self, term: &Term) -> io::Result<Vec<usize>> {
         let mut sel = 0;
-        let mut selected: Vec<_> = repeat(false).take(self.items.len()).collect();
+        let mut selected: Vec<_> = repeat(self.default_selected)
+            .take(self.items.len())
+            .collect();
         loop {
             for (idx, item) in self.items.iter().enumerate() {
                 term.write_line(&format!(

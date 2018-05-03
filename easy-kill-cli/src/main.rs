@@ -50,8 +50,13 @@ fn main() {
              .takes_value(true)
              .required(false)
              .index(1))
+        .arg(clap::Arg::with_name("selected")
+             .long("selected")
+             .short("s")
+             .takes_value(false))
         .get_matches();
     let pattern = matches.value_of("pattern");
+    let selected = matches.is_present("selected");
 
     if let Some(pattern) = pattern {
         let mut ps_child = Command::new("ps")
@@ -91,6 +96,7 @@ fn main() {
                 .map(|&(pid, command)| format!("[{}]: {}", pid, command))
                 .collect::<Vec<String>>();
             let selections = Checkbox::new()
+                .default(selected)
                 .items(items
                        .iter()
                        .map(|s| s.as_ref())
