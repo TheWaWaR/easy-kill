@@ -1,17 +1,20 @@
 #![feature(getpid)]
 
 extern crate clap;
-extern crate dialoguer;
+extern crate console;
 extern crate regex;
 extern crate libc;
 #[macro_use]
 extern crate lazy_static;
 
+mod checkbox;
+
 use std::ffi::CStr;
 use std::process::{self, Command};
 
 use regex::Regex;
-use dialoguer::Checkboxes;
+
+use checkbox::Checkbox;
 
 // $> ps aux:
 // USER PID %CPU %MEM VSZ RSS TT STAT STARTED TIME COMMAND
@@ -28,6 +31,7 @@ const PS_PATTERN: &'static str = concat!(
     r"(?P<time>\S+)\s+",
     r"(?P<command>.+)",
 );
+
 
 lazy_static! {
     static ref PS_REGEX: Regex = Regex::new(PS_PATTERN).unwrap();
@@ -86,7 +90,7 @@ fn main() {
                 .iter()
                 .map(|&(pid, command)| format!("[{}]: {}", pid, command))
                 .collect::<Vec<String>>();
-            let selections = Checkboxes::new()
+            let selections = Checkbox::new()
                 .items(items
                        .iter()
                        .map(|s| s.as_ref())
