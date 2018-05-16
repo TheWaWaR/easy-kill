@@ -12,7 +12,7 @@ mod checkbox;
 use std::ffi::CStr;
 use std::process::{self, Command};
 
-use regex::Regex;
+use regex::{Regex, Captures};
 
 use checkbox::Checkbox;
 
@@ -31,10 +31,12 @@ const PS_PATTERN: &'static str = concat!(
     r"(?P<time>\S+)\s+",
     r"(?P<command>.+)",
 );
+const PID_RANGE_PATTERN: &'static str = r"^(?P<start>\d+)-(?P<end>\d+)$";
 
 
 lazy_static! {
     static ref PS_REGEX: Regex = Regex::new(PS_PATTERN).unwrap();
+    static ref PID_RANGE_REGEX: Regex = Regex::new(PID_RANGE_PATTERN).unwrap();
 }
 
 // struct ProcessInfo {
@@ -43,6 +45,20 @@ lazy_static! {
 //     port: u16,
 //     command: String,
 // }
+
+fn parse_pid_range(s: &str) -> Result<(u32, u32), ()> {
+    let get_match = |caps: &Captures, name: &str| -> Option<u32> {
+        caps.name(name).map(|m| m.as_str().parse::<u32>().unwrap())
+    };
+    PID_RANGE_REGEX.captures(s)
+        .and_then(|caps| {
+            match (get_match(&caps, "start"), get_match(&caps, "end")) {
+                (Some(start), Some(end)) if start <= end => Some((start, end)),
+                _ => None
+            }
+        })
+        .ok_or(())
+}
 
 fn main() {
     let matches = clap::App::new("Easy kill processes")
@@ -54,9 +70,21 @@ fn main() {
              .long("selected")
              .short("s")
              .takes_value(false))
+        .arg(clap::Arg::with_name("pid-range")
+             .long("pid-range")
+             .short("r")
+             .validator(|s| {
+                 match parse_pid_range(s.as_str()) {
+                     Ok(_) => Ok(()),
+                     Err(_) => Err(String::from("Invalid pid range"))
+                 }
+             })
+             .takes_value(true))
         .get_matches();
     let pattern = matches.value_of("pattern");
     let selected = matches.is_present("selected");
+    let (pid_start, pid_end) = matches.value_of("pid-range")
+        .map_or((0, std::u32::MAX), |s| parse_pid_range(s).unwrap());
 
     if let Some(pattern) = pattern {
         let mut ps_child = Command::new("ps")
@@ -77,7 +105,11 @@ fn main() {
                     let pid = caps
                         .name("pid")
                         .map_or(0, |m| m.as_str().parse::<u32>().unwrap());
-                    if pid != ps_pid && pid != process::id() {
+                    if pid != ps_pid
+                        && pid != process::id()
+                        && pid >= pid_start
+                        && pid <= pid_end
+                    {
                         let command = caps
                             .name("command")
                             .map_or("", |m| m.as_str());
